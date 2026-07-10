@@ -1,4 +1,7 @@
 // app_server/controllers/travel.js
+var fs = require('fs');
+
 exports.travel = function (req, res) {
-    res.render('travel', { title: 'Travel' });
+    var trips = JSON.parse(fs.readFileSync('./data/trips.json', 'utf8'));
+    res.render('travel', { title: 'Travel', trips: trips });
 };
