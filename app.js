@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var hbs = require('hbs');
+const db = require('./app_server/models/db');
 
 var app = express();
 
