@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var hbs = require('hbs');
-const db = require('./app_server/models/db');
+const db = require('./app_api/models/db');
 
 var app = express();
 
@@ -24,6 +24,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // routes
 var travelRouter = require('./app_server/routes/index');
 app.use('/', travelRouter);
+
+var apiRouter = require('./app_api/routes/index');
+console.log('apiRouter type:', typeof apiRouter);
+app.use('/api', apiRouter);
 
 app.listen(3000, function () {
     console.log('Server is running on http://localhost:3000');
