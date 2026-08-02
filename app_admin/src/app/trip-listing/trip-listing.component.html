@@ -1,0 +1,7 @@
+<div class="row">
+  @for (trip of trips(); track trip.code) {
+    <div class="col-md-4">
+      <app-trip-card [trip]="trip" (deleteTrip)="onDeleteTrip($event)"></app-trip-card>
+    </div>
+  }
+</div>

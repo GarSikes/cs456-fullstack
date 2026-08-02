@@ -2,8 +2,12 @@ var express = require('express');
 var path = require('path');
 var hbs = require('hbs');
 const db = require('./app_api/models/db');
+var cors = require('cors');
 
 var app = express();
+
+app.use(cors());
+app.use(express.json());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'app_server/views'));
