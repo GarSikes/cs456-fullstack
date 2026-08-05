@@ -5,7 +5,7 @@
     <p class="card-text">{{ trip.description }}</p>
     <p class="card-text"><strong>{{ trip.length }}</strong> starting {{ trip.start }}</p>
     <p class="card-text">${{ trip.perPerson }} per person</p>
-    <a [routerLink]="['/edit-trip', trip.code]" class="btn btn-secondary">Edit</a>
-    <button type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
+    <a *ngIf="isLoggedIn()" [routerLink]="['/edit-trip', trip.code]" class="btn btn-secondary">Edit</a>
+    <button *ngIf="isLoggedIn()" type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
   </div>
 </div>

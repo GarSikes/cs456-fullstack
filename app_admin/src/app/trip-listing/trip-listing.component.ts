@@ -1,17 +1,23 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TripDataService } from '../trip-data.service';
 import { TripCardComponent } from '../trip-card/trip-card.component';
+import { Authentication } from '../authentication';
 
 @Component({
   selector: 'app-trip-listing',
-  imports: [TripCardComponent],
+  imports: [TripCardComponent, CommonModule, RouterLink],
   templateUrl: './trip-listing.component.html',
   styleUrl: './trip-listing.component.css',
 })
 export class TripListingComponent implements OnInit {
   trips = signal<any[]>([]);
 
-  constructor(private tripDataService: TripDataService) {}
+  constructor(
+    private tripDataService: TripDataService,
+    private authenticationService: Authentication
+  ) {}
 
   ngOnInit(): void {
     this.loadTrips();
@@ -37,5 +43,9 @@ export class TripListingComponent implements OnInit {
         console.error('Error deleting trip:', error);
       }
     });
+  }
+
+  public isLoggedIn(): boolean {
+    return this.authenticationService.loggedIn()
   }
 }
