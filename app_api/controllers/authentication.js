@@ -3,35 +3,43 @@ const User = require('../models/user');
 const passport = require('passport');
 
 const register = async (req, res) => {
-    // Validate message to insure that all parameters are present.
     if (!req.body.name || !req.body.email || !req.body.password) {
         return res
             .status(400)
             .json({ "message": "All fields required" });
     }
 
-    const user = new User(
-    {
-        name: req.body.name,   // Set User name
-        email: req.body.email, // Set e-mail address
-        password: ''           // Start with empty password
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(req.body.password)) {
+         return res
+        .status(400)
+        .json({ "message": "Password must be at least 8 characters and include both letters and numbers" });
+}
+
+    const user = new User({
+        name: req.body.name,
+        email: req.body.email,
+        password: ''
     });
 
-    user.setPassword(req.body.password); // Set user password
-    const q = await user.save();
+    user.setPassword(req.body.password);
 
-    if (!q)
-    {
-        // Database returned no data
-        return res
-            .status(400)
-            .json(err);
-    } else {
-        // Return new user token
+    try {
+        await user.save();
         const token = user.generateJWT();
         return res
             .status(200)
-            .json({token});
+            .json({ token });
+    } catch (err) {
+        if (err.code === 11000) {
+            return res
+                .status(409)
+                .json({ "message": "Email already registered" });
+        }
+        console.log('Register error: ' + err);
+        return res
+            .status(500)
+            .json({ "message": "Something went wrong creating the account" });
     }
 };
 

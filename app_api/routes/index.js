@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken'); // Enable JSON Web Tokens
+const rateLimit = require('express-rate-limit');
 
 const tripsController = require('../controllers/trips');
 const authController = require('../controllers/authentication');
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // limit each IP to 10 attempts per window on these routes
+    message: { message: 'Too many attempts, please try again later.' }
+});
 
 // Method to authenticate our JWT
 function authenticateJWT(req, res, next) {
@@ -14,30 +21,31 @@ function authenticateJWT(req, res, next) {
         return res.sendStatus(401);
     }
 
-    let headers = authHeader.split(' ');
-    if (headers.length < 1) {
-        console.log('Not enough tokens in Auth Header: ' + headers.length);
-        return res.sendStatus(501);
+    const headers = authHeader.split(' ');
+    if (headers.length < 2 || headers[0] !== 'Bearer') {
+        console.log('Malformed Authorization header');
+        return res.sendStatus(400);
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = headers[1];
 
     if (token == null) {
         console.log('Null Bearer Token');
         return res.sendStatus(401);
     }
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET, (err, verified) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, verified) => {
         if (err) {
-            return res.sendStatus(401).json('Token Validation Error!');
+            console.log('Token Validation Error!');
+            return res.sendStatus(401);
         }
-        req.auth = verified; // Set the auth param to the decoded object
+        req.auth = verified;
+        next(); // only reached once the token actually checks out
     });
-    next(); // need to continue or this will hang forever
 }
 
-router.route('/register').post(authController.register);
-router.route('/login').post(authController.login);
+router.route('/register').post(authLimiter, authController.register);
+router.route('/login').post(authLimiter, authController.login);
 
 router
   .route('/trips')
